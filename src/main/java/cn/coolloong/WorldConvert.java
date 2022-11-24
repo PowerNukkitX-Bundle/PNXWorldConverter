@@ -32,7 +32,7 @@ public class WorldConvert {
             jeLevelData = NBTIO.readCompressed(levelDat, ByteOrder.BIG_ENDIAN).getCompound("Data");
         } catch (IOException e) {
             System.out.println("level.dat file does not exist, please check if the path is correct !!!");
-            System.exit(0);
+            PNXWorldConverter.close(0);
         }
         if (dimension.equals(DimensionEnum.OVERWORLD)) {
             output = new File("output/world");
@@ -48,13 +48,13 @@ public class WorldConvert {
         }
         if (!preCreate.exists() && !preCreate.mkdirs()) {
             System.out.println("Could not create the directory " + preCreate);
-            System.exit(0);
+            PNXWorldConverter.close(0);
         }
 
         var regions = new File(path + "\\region");
         if (!regions.exists()) {
             System.out.println("region folder does not exist, please check if the path is correct !!!");
-            System.exit(0);
+            PNXWorldConverter.close(0);
         }
 
         var dimensionData = dimension.getDimensionData();
@@ -101,7 +101,7 @@ public class WorldConvert {
             });
         } catch (IOException e) {
             System.out.println("Unable to write level.dat to output folder!!!");
-            System.exit(0);
+            PNXWorldConverter.close(0);
         }
         try {
             Anvil format = new Anvil(null, output.getPath() + "/");
@@ -112,7 +112,7 @@ public class WorldConvert {
             }
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(0);
+            PNXWorldConverter.close(0);
         }
         return this;
     }

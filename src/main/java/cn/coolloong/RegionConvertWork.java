@@ -6,11 +6,16 @@ import cn.coolloong.utils.DataConvert;
 import cn.nukkit.level.DimensionEnum;
 import cn.nukkit.level.format.LevelProvider;
 import org.jglrxavpok.hephaistos.mca.AnvilException;
+import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class RegionConvertWork implements Runnable {
     private final File mca;
@@ -50,10 +55,29 @@ public class RegionConvertWork implements Runnable {
                     if (nowThread.isInterrupted()) throw new InterruptedException();
                     progress++;
                     //x + region *32 z + region *32
-                    var chunkColumn = region.getChunk(rx, rz);
+                    ChunkColumn chunkColumn = null;
+                    try {
+                        chunkColumn = region.getChunk(rx, rz);
+                    } catch (AnvilException e) {
+                        var chunk = region.getChunkData(rx, rz);
+                        if (chunk != null) {
+                            //todo 从NBT转换MC_1_15版本一下的区块
+                            var sections = chunk.getCompound("Level").getList("Sections");
+                            //代表16 x 16 column的生物群系 1.12.2还没有3d生物群系
+                            var biome = chunk.getCompound("Level").getByteArray("Biomes");
+                            System.out.println(biome.getSize());
+                            var section = (NBTCompound) sections.get(0);
+                            //一个section 16x16x16
+                            //blocks 大小为4096 坐标排序方式为yzx
+                            //data大小为2048
+                            //SkyLight大小为2048
+                            Files.writeString(Path.of("target/chunk" + rx + ";" + rz), region.getChunkData(rx, rz).toString(), StandardCharsets.UTF_8);
+                        }
+                    }
                     if (chunkColumn == null) {
                         var pnxChunk = ProxyChunk.getEmptyChunk(rx, rz, levelProvider, dimension, 0, false, false);
-                        if (pnxChunk == null) System.exit(0);//error exit
+                        if (pnxChunk == null) PNXWorldConverter.close(0);//error exit
+                        //noinspection ConstantConditions
                         pnxChunk.initChunk();
                         pnxRegion.saveChunk(rx & 31, rz & 31, pnxChunk.toBinary());
                         continue;

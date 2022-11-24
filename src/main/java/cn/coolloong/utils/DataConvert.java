@@ -22,6 +22,7 @@ import java.util.function.Consumer;
 
 public class DataConvert {
     private static final Map<String, Map<String, Object>> BLOCKS_MAP = new HashMap<>();
+    private static final Map<String, Map<String, Object>> DEFAULT_BLOCKS_MAP = new HashMap<>();
     private static final Map<String, Integer> BIOMES_MAP = new HashMap<>();
     private static final Map<String, Map<String, Object>> ITEM_MAP = new HashMap<>();
     private static final Map<String, Short> ENCHANTMENT_MAP = new HashMap<>();
@@ -59,6 +60,14 @@ public class DataConvert {
             throw new RuntimeException(e);
         }
         config.getAll().forEach((k, v) -> ENCHANTMENT_MAP.put(k, ((Number) v).shortValue()));
+
+        try {
+            config.load(PNXWorldConverter.class.getModule().getResourceAsStream("je1192DefaultBlockState.json"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        //noinspection unchecked
+        config.getAll().forEach((k, v) -> DEFAULT_BLOCKS_MAP.put(k, (Map<String, Object>) v));
     }
 
     public static BlockState convertBlockState(org.jglrxavpok.hephaistos.mca.BlockState sourceType) {
@@ -72,20 +81,24 @@ public class DataConvert {
         var beState = PNXWorldHandle.jeBlocksMapping.get(jeState);
         String beBlockName = null;
         Map<String, Object> beBlockState = null;
+
         if (beState != null) {
             beBlockName = beState.get("bedrock_identifier").toString();
             //noinspection unchecked
             beBlockState = (Map<String, Object>) beState.get("bedrock_states");
         } else {//由于不同版本数据值可能存在一定区别，当前映射文件是最新的，所以找不到就模糊匹配
-            for (var key : BLOCKS_MAP.keySet()) {
-                if (key.contains(sourceType.getName())) {
-                    if (jeState.getAttributes().keySet().stream().anyMatch(key::contains)) {
-                        beBlockName = BLOCKS_MAP.get(key).get("bedrock_identifier").toString();
-                        //noinspection unchecked
-                        beBlockState = (Map<String, Object>) BLOCKS_MAP.get(key).get("bedrock_states");
+            var defaultState = DEFAULT_BLOCKS_MAP.get(sourceType.getName());
+            if (defaultState != null) {
+                for (var s1 : defaultState.keySet()) {
+                    if (!jeState.getAttributes().containsKey(s1)) {
+                        jeState.getAttributes().put(s1, defaultState.get(s1));
                     }
                 }
-            }
+                var fixBeState = PNXWorldHandle.jeBlocksMapping.get(jeState);
+                beBlockName = fixBeState.get("bedrock_identifier").toString();
+                //noinspection unchecked
+                beBlockState = (Map<String, Object>) fixBeState.get("bedrock_states");
+            } else System.out.println(sourceType.getName());
         }
         if (beBlockState != null) {
             var nkState = new StringBuilder();

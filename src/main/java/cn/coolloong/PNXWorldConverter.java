@@ -16,8 +16,8 @@ public class PNXWorldConverter {
         try {
             Block.init();
             Class.forName("cn.nukkit.level.Level");
-            var RegionConvert = new WorldConvert("D:\\Minecraft\\java mc\\.minecraft\\versions\\1.16.5\\saves\\test");
-            RegionConvert.convert(DimensionEnum.NETHER);
+            var RegionConvert = new WorldConvert("D:\\Minecraft\\MultiMC\\instances\\1.15.2\\.minecraft\\saves\\新的世界");
+            RegionConvert.convert(DimensionEnum.OVERWORLD);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -35,20 +35,24 @@ public class PNXWorldConverter {
                 }).reduce((a, b) -> a + '\n' + b).get();
                 System.out.println(log);
             }
-        }, 10, 500);
+        }, 10, 1000);
         WorldConvert.THREAD_POOL_EXECUTOR.shutdown();
         while (!WorldConvert.THREAD_POOL_EXECUTOR.isTerminated()) {
         }
         try {
             Thread.sleep(1000);
-            TIMER.cancel();
-            WorldConvert.THREAD_POOL_EXECUTOR.shutdownNow();
             System.out.println("All completed,Sum Time Consuming: " + RUN_SET.stream()
                     .map(run -> Long.parseLong(run.getTimeConsume().replace("ms", "")))
                     .max(Long::compareTo).get() + "ms");
-            System.exit(1);
+            close(1);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static void close(int status) {
+        TIMER.cancel();
+        WorldConvert.THREAD_POOL_EXECUTOR.shutdownNow();
+        System.exit(status);
     }
 }
