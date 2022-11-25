@@ -5,7 +5,6 @@ import cn.coolloong.SupportVersion;
 import cn.coolloong.proxy.ProxyChunk;
 import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockstate.BlockState;
-import cn.nukkit.level.terra.handles.PNXWorldHandle;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.utils.Config;
 import com.google.gson.Gson;
@@ -72,7 +71,7 @@ public final class DataConvert {
         config.getAll().forEach((k, v) -> JE112_ENCHID_2_PNXID.put(Math.round(Float.parseFloat(k)), ((Number) v).intValue()));
 
         try {
-            config.load(PNXWorldHandle.class.getModule().getResourceAsStream("jeMappings/jeBlocksMapping.json"));
+            config.load(PNXWorldConverter.class.getModule().getResourceAsStream("jeBlocksMapping.json"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

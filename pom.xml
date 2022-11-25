@@ -43,6 +43,7 @@
 
     <dependencies>
         <dependency>
+            <!--     maven local repository       -->
             <groupId>cn.powernukkitx</groupId>
             <artifactId>powernukkitx</artifactId>
             <version>1.19.40-r3-tmp</version>

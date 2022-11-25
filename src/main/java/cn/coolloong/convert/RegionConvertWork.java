@@ -26,7 +26,7 @@ public class RegionConvertWork implements Runnable {
     protected final Thread nowThread;
     protected final SupportVersion version;
     protected int progress = 0;
-    protected String timeConsume;
+    protected String timeConsume = "0ms";
 
     public RegionConvertWork(File mca, LevelProvider levelProvider, DimensionEnum dimension, SupportVersion version) {
         this.nowThread = Thread.currentThread();
