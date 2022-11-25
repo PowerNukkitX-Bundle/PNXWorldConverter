@@ -1,5 +1,7 @@
-package cn.coolloong;
+package cn.coolloong.convert;
 
+import cn.coolloong.PNXWorldConverter;
+import cn.coolloong.SupportVersion;
 import cn.coolloong.proxy.ProxyChunk;
 import cn.coolloong.proxy.ProxyRegionLoader;
 import cn.coolloong.utils.DataConvert;
@@ -8,33 +10,34 @@ import cn.nukkit.level.format.LevelProvider;
 import org.jglrxavpok.hephaistos.mca.AnvilException;
 import org.jglrxavpok.hephaistos.mca.ChunkColumn;
 import org.jglrxavpok.hephaistos.mca.RegionFile;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
+/**
+ * support 1.15-1.19 region
+ */
 public class RegionConvertWork implements Runnable {
-    private final File mca;
-    private final LevelProvider levelProvider;
-    private final DimensionEnum dimension;
-    private Thread nowThread;
-    private int progress = 0;
-    private String timeConsume;
+    protected final File mca;
+    protected final LevelProvider levelProvider;
+    protected final DimensionEnum dimension;
+    protected final Thread nowThread;
+    protected final SupportVersion version;
+    protected int progress = 0;
+    protected String timeConsume;
 
-    public RegionConvertWork(File mca, LevelProvider levelProvider, DimensionEnum dimension) {
+    public RegionConvertWork(File mca, LevelProvider levelProvider, DimensionEnum dimension, SupportVersion version) {
+        this.nowThread = Thread.currentThread();
         this.mca = mca;
         this.levelProvider = levelProvider;
         this.dimension = dimension;
+        this.version = version;
+        System.out.println("Starting convert  " + mca.getName());
     }
 
     @Override
     public void run() {
-        nowThread = Thread.currentThread();
-        System.out.println("Starting convert  " + mca.getName());
         var time = System.currentTimeMillis();
         var mcaName = mca.getName().split("\\.");
         int regionX = Integer.parseInt(mcaName[1]);
@@ -55,25 +58,19 @@ public class RegionConvertWork implements Runnable {
                     if (nowThread.isInterrupted()) throw new InterruptedException();
                     progress++;
                     //x + region *32 z + region *32
-                    ChunkColumn chunkColumn = null;
+                    ChunkColumn chunkColumn;
                     try {
                         chunkColumn = region.getChunk(rx, rz);
-                    } catch (AnvilException e) {
-                        var chunk = region.getChunkData(rx, rz);
-                        if (chunk != null) {
-                            //todo 从NBT转换MC_1_15版本一下的区块
-                            var sections = chunk.getCompound("Level").getList("Sections");
-                            //代表16 x 16 column的生物群系 1.12.2还没有3d生物群系
-                            var biome = chunk.getCompound("Level").getByteArray("Biomes");
-                            System.out.println(biome.getSize());
-                            var section = (NBTCompound) sections.get(0);
-                            //一个section 16x16x16
-                            //blocks 大小为4096 坐标排序方式为yzx
-                            //data大小为2048
-                            //SkyLight大小为2048
-                            Files.writeString(Path.of("target/chunk" + rx + ";" + rz), region.getChunkData(rx, rz).toString(), StandardCharsets.UTF_8);
+                    } catch (IllegalArgumentException e) {
+                        var chunkData = region.getChunkData(rx, rz).toMutableCompound();
+                        if (chunkData.getCompound("Level").getString("Status").equals("carved")) {
+                            var level = chunkData.getCompound("Level").toMutableCompound();
+                            level.setString("Status", "carvers");
+                            chunkData.set("Level", level.toCompound());
                         }
+                        chunkColumn = new ChunkColumn(chunkData.toCompound());
                     }
+
                     if (chunkColumn == null) {
                         var pnxChunk = ProxyChunk.getEmptyChunk(rx, rz, levelProvider, dimension, 0, false, false);
                         if (pnxChunk == null) PNXWorldConverter.close(0);//error exit
@@ -82,6 +79,12 @@ public class RegionConvertWork implements Runnable {
                         pnxRegion.saveChunk(rx & 31, rz & 31, pnxChunk.toBinary());
                         continue;
                     }
+
+                    //debug
+                    /*if(region.getChunkData(rx,rz)!=null){
+                        Files.writeString(Path.of("target/mca" + rx + ";" + rz + ".json"), region.getChunkData(rx, rz).toSNBT(), StandardCharsets.UTF_8);
+                    }*/
+
                     int miny = dimension.equals(DimensionEnum.NETHER) ? 0 : chunkColumn.getMinY();
                     int maxy = dimension.equals(DimensionEnum.NETHER) ? 128 : chunkColumn.getMaxY();
                     var pnxChunk = ProxyChunk.getEmptyChunk(rx, rz, levelProvider, dimension, chunkColumn.getInhabitedTime(), true, true);
@@ -124,8 +127,7 @@ public class RegionConvertWork implements Runnable {
                             }
                         }
                     }
-//                    chunkColumn.getTileEntities().forEach((Consumer<? super NBTCompound>) nbt-> System.out.println(nbt.toSNBT()));
-                    DataConvert.convertTileEntities(pnxChunk, chunkColumn, chunkColumn.getTileEntities());
+                    DataConvert.convertTileEntities(pnxChunk, chunkColumn::getBlockState, chunkColumn.getTileEntities(), version);
                     pnxRegion.saveChunk(rx & 31, rz & 31, pnxChunk.toBinary());
                     region.forget(chunkColumn);
                 }

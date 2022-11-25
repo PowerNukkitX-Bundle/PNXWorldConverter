@@ -1,5 +1,7 @@
 package cn.coolloong;
 
+import cn.coolloong.convert.RegionConvertWork;
+import cn.coolloong.convert.WorldConvert;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.DimensionEnum;
 
@@ -7,20 +9,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 
 public class PNXWorldConverter {
     private static final Set<RegionConvertWork> RUN_SET = new HashSet<>();
     private static final Timer TIMER = new Timer();
+    public static final ForkJoinPool THREAD_POOL_EXECUTOR = (ForkJoinPool) Executors.newWorkStealingPool();
 
-    public static void main(String[] args) {
-        try {
-            Block.init();
-            Class.forName("cn.nukkit.level.Level");
-            var RegionConvert = new WorldConvert("D:\\Minecraft\\MultiMC\\instances\\1.15.2\\.minecraft\\saves\\新的世界");
-            RegionConvert.convert(DimensionEnum.OVERWORLD);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    static {
+        init();
         TIMER.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -35,9 +33,14 @@ public class PNXWorldConverter {
                 }).reduce((a, b) -> a + '\n' + b).get();
                 System.out.println(log);
             }
-        }, 10, 1000);
-        WorldConvert.THREAD_POOL_EXECUTOR.shutdown();
-        while (!WorldConvert.THREAD_POOL_EXECUTOR.isTerminated()) {
+        }, 1000, 1000);
+    }
+
+    public static void main(String[] args) {
+        var RegionConvert = new WorldConvert("D:\\Minecraft\\MultiMC\\instances\\1.7.10\\.minecraft\\saves\\新的世界");
+        RegionConvert.convert(DimensionEnum.OVERWORLD);
+        PNXWorldConverter.THREAD_POOL_EXECUTOR.shutdown();
+        while (!PNXWorldConverter.THREAD_POOL_EXECUTOR.isTerminated()) {
         }
         try {
             Thread.sleep(1000);
@@ -52,7 +55,17 @@ public class PNXWorldConverter {
 
     public static void close(int status) {
         TIMER.cancel();
-        WorldConvert.THREAD_POOL_EXECUTOR.shutdownNow();
+        PNXWorldConverter.THREAD_POOL_EXECUTOR.shutdownNow();
         System.exit(status);
+    }
+
+    public static void init() {
+        try {
+            Block.init();
+            Class.forName("cn.nukkit.level.Level");
+            Class.forName("cn.coolloong.utils.DataConvert");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
