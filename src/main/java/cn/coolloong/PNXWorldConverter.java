@@ -26,31 +26,43 @@ public class PNXWorldConverter implements Callable<Integer> {
     private static final Set<RegionConvertWork> RUN_SET = new HashSet<>();
     private static final Timer TIMER = new Timer();
     public static ForkJoinPool THREAD_POOL_EXECUTOR;
+    public static Thread exitThread;
+    private static boolean interrupted = false;
 
     public static void main(String[] args) {
         var mainClass = new PNXWorldConverter();
         var status = new CommandLine(mainClass).execute(args);
-        if (status == 1) {
+        if (status == 0) {
             init();
             var RegionConvert = new WorldConvert(mainClass.target);
             RegionConvert.convert(mainClass.dimensionEnum);
             PNXWorldConverter.THREAD_POOL_EXECUTOR.shutdown();
             while (!PNXWorldConverter.THREAD_POOL_EXECUTOR.isTerminated()) {
             }
-            try {
-                Thread.sleep(1000);
-                System.out.println("All completed,Sum Time Consuming: " + RUN_SET.stream()
-                        .map(run -> Long.parseLong(run.getTimeConsume().replace("ms", "")))
-                        .max(Long::compareTo).get() + "ms");
+            if (!interrupted) {
+                close(0);
+            } else {
                 close(1);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
             }
         }
-        System.exit(1);
+        System.exit(0);
     }
 
     public static void close(int status) {
+        if (status == 0) {
+            Runtime.getRuntime().removeShutdownHook(exitThread);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            RUN_SET.stream()
+                    .map(run -> Long.parseLong(run.getTimeConsume().replace("ms", "")))
+                    .max(Long::compareTo).ifPresent(s -> System.out.println("All completed,Sum Time Consuming: " + s + "ms"));
+            System.out.println("complete!");
+        } else if (status == 1) {
+            System.out.println("Convert interrupt!");
+        }
         TIMER.cancel();
         PNXWorldConverter.THREAD_POOL_EXECUTOR.shutdownNow();
         System.exit(status);
@@ -58,6 +70,8 @@ public class PNXWorldConverter implements Callable<Integer> {
 
     public static void init() {
         try {
+            exitThread = new ExitHandler();
+            Runtime.getRuntime().addShutdownHook(exitThread);
             Block.init();
             Class.forName("cn.nukkit.level.Level");
             Class.forName("cn.coolloong.utils.DataConvert");
@@ -70,11 +84,10 @@ public class PNXWorldConverter implements Callable<Integer> {
                             RUN_SET.add(task);
                         }
                     }
-                    var log = "---\n" + RUN_SET.stream().map(run -> {
+                    RUN_SET.stream().map(run -> {
                         if (!run.isDone()) return run.getName() + ": " + run.getProgress();
                         else return run.getName() + ": Done!" + "Time consuming: " + run.getTimeConsume();
-                    }).reduce((a, b) -> a + '\n' + b).get();
-                    System.out.println(log);
+                    }).reduce((a, b) -> a + '\n' + b).ifPresent(s -> System.out.println("---\n" + s));
                 }
             }, 500, 1000);
         } catch (Exception e) {
@@ -85,9 +98,29 @@ public class PNXWorldConverter implements Callable<Integer> {
     @Override
     public Integer call() {
         if (dimensionEnum == null || target == null) {
-            System.out.println("");
-            return 0;
+            return 1;
         }
-        return 1;
+        return 0;
+    }
+
+    private static class ExitHandler extends Thread {
+        public ExitHandler() {
+            super("CTRLC Handler");
+        }
+
+        public void run() {
+            System.out.println("Detect ctrl+c to interrupt a running task.");
+            PNXWorldConverter.RUN_SET.forEach(task -> {
+                if (!task.isDone()) {
+                    task.setInterrupted();
+                }
+            });
+            PNXWorldConverter.interrupted = true;
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

@@ -146,11 +146,12 @@ public final class DataConvert {
                 System.out.println("找不到" + sourceType.getName() + "对应的默认方块状态");
             }
         }
+
         if (beBlockState != null) {
             var nkState = new StringBuilder();
             beBlockState.forEach((k, v) -> {
                 if (v.toString().equals("true") || v.toString().equals("false")) {
-                    nkState.append(";").append(k).append("=").append(v.equals("true") ? 1 : 0);
+                    nkState.append(";").append(k).append("=").append(v.toString().equals("true") ? 1 : 0);
                 } else if (v instanceof Number number) {
                     nkState.append(";").append(k).append("=").append(number.intValue());
                 } else nkState.append(";").append(k).append("=").append(v);

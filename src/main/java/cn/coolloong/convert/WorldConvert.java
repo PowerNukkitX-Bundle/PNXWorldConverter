@@ -42,17 +42,17 @@ public class WorldConvert {
         }
         if (!preCreate.exists() && !preCreate.mkdirs()) {
             System.out.println("Could not create the directory " + preCreate);
-            PNXWorldConverter.close(0);
+            PNXWorldConverter.close(1);
         }
         if (!regions.exists()) {
             System.out.println("region folder does not exist, please check if the path is correct !!!");
-            PNXWorldConverter.close(0);
+            PNXWorldConverter.close(1);
         }
 
         var mcas = Objects.requireNonNull(regions.listFiles());
         if (mcas.length == 0) {
             System.out.println("region folder is empty, please re-create world !!!");
-            PNXWorldConverter.close(0);
+            PNXWorldConverter.close(1);
         }
         //convert level.dat to pnx
         convertLevelDat(dimension, output);
@@ -61,14 +61,16 @@ public class WorldConvert {
         try {
             Anvil format = new Anvil(null, output.getPath() + "/");
             for (var mca : mcas) {
-                //read region version information
-                var task = ConvertWorkFactory.make(mca, format, dimension);
-                PNXWorldConverter.THREAD_POOL_EXECUTOR.execute(task);
-                tasks.add(task);
+                if (!new File(preCreate.getPath() + "/" + mca.getName()).exists()) {
+                    //read region version information
+                    var task = ConvertWorkFactory.make(mca, format, dimension);
+                    PNXWorldConverter.THREAD_POOL_EXECUTOR.execute(task);
+                    tasks.add(task);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
-            PNXWorldConverter.close(0);
+            PNXWorldConverter.close(1);
         }
         return this;
     }
@@ -80,7 +82,7 @@ public class WorldConvert {
             jeLevelData = NBTIO.readCompressed(levelDat, ByteOrder.BIG_ENDIAN).getCompound("Data");
         } catch (IOException e) {
             System.out.println("level.dat file does not exist, please check if the path is correct !!!");
-            PNXWorldConverter.close(0);
+            PNXWorldConverter.close(1);
         }
 
         var dimensionData = dimension.getDimensionData();
@@ -128,7 +130,7 @@ public class WorldConvert {
             });
         } catch (IOException e) {
             System.out.println("Unable to write level.dat to output folder!!!");
-            PNXWorldConverter.close(0);
+            PNXWorldConverter.close(1);
         }
     }
 }

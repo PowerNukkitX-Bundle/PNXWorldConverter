@@ -14,6 +14,7 @@ import org.jglrxavpok.hephaistos.mca.RegionFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
 
 /**
  * support 1.15-1.19 region
@@ -42,7 +43,6 @@ public class RegionConvertWork implements Runnable {
         var mcaName = mca.getName().split("\\.");
         int regionX = Integer.parseInt(mcaName[1]);
         int regionZ = Integer.parseInt(mcaName[2]);
-
         ProxyRegionLoader pnxRegion;
         RegionFile region;
         try {
@@ -73,7 +73,7 @@ public class RegionConvertWork implements Runnable {
 
                     if (chunkColumn == null) {
                         var pnxChunk = ProxyChunk.getEmptyChunk(rx, rz, levelProvider, dimension, 0, false, false);
-                        if (pnxChunk == null) PNXWorldConverter.close(0);//error exit
+                        if (pnxChunk == null) PNXWorldConverter.close(1);//error exit
                         //noinspection ConstantConditions
                         pnxChunk.initChunk();
                         pnxRegion.saveChunk(rx & 31, rz & 31, pnxChunk.toBinary());
@@ -81,9 +81,9 @@ public class RegionConvertWork implements Runnable {
                     }
 
                     //debug
-                    /*if(region.getChunkData(rx,rz)!=null){
-                        Files.writeString(Path.of("target/mca" + rx + ";" + rz + ".json"), region.getChunkData(rx, rz).toSNBT(), StandardCharsets.UTF_8);
-                    }*/
+//                    if(region.getChunkData(rx,rz)!=null){
+//                        Files.writeString(Path.of("target/mca" + rx + ";" + rz + ".json"), region.getChunkData(rx, rz).toSNBT(), StandardCharsets.UTF_8);
+//                    }
 
                     int miny = dimension.equals(DimensionEnum.NETHER) ? 0 : chunkColumn.getMinY();
                     int maxy = dimension.equals(DimensionEnum.NETHER) ? 128 : chunkColumn.getMaxY();
@@ -138,6 +138,15 @@ public class RegionConvertWork implements Runnable {
             try {
                 region.close();
                 pnxRegion.close();
+                File delete = null;
+                if (dimension.equals(DimensionEnum.OVERWORLD)) {
+                    delete = new File("output/world/region/" + mca.getName());
+                } else if (dimension.equals(DimensionEnum.NETHER)) {
+                    delete = new File("output/nether/region/" + mca.getName());
+                } else if (dimension.equals(DimensionEnum.END)) {
+                    delete = new File("output/the_end/region/" + mca.getName());
+                }
+                if (delete.exists()) Files.delete(delete.toPath());
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

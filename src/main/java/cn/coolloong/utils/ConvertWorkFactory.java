@@ -41,7 +41,7 @@ public final class ConvertWorkFactory {
             } catch (AnvilException | IOException e) {
                 System.out.println("read chunk version information error !!!");
                 region.close();
-                PNXWorldConverter.close(0);
+                PNXWorldConverter.close(1);
             }
         }
 
@@ -52,7 +52,7 @@ public final class ConvertWorkFactory {
         if (result == null) {
             System.out.println("error,unknown region format!!!");
             region.close();
-            PNXWorldConverter.close(0);
+            PNXWorldConverter.close(1);
         }
         return result;
     }

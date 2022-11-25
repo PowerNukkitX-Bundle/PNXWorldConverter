@@ -56,7 +56,7 @@ public class OldRegionConvertWork extends RegionConvertWork {
                     var chunkNBT = region.getChunkData(rx, rz);
                     if (chunkNBT == null) {
                         var pnxChunk = ProxyChunk.getEmptyChunk(rx, rz, levelProvider, dimension, 0, false, false);
-                        if (pnxChunk == null) PNXWorldConverter.close(0);//error exit
+                        if (pnxChunk == null) PNXWorldConverter.close(1);//error exit
                         //noinspection ConstantConditions
                         pnxChunk.initChunk();
                         pnxRegion.saveChunk(rx & 31, rz & 31, pnxChunk.toBinary());
