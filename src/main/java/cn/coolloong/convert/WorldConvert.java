@@ -2,6 +2,7 @@ package cn.coolloong.convert;
 
 import cn.coolloong.PNXWorldConverter;
 import cn.coolloong.utils.ConvertWorkFactory;
+import cn.coolloong.utils.Logger;
 import cn.nukkit.level.DimensionEnum;
 import cn.nukkit.level.format.anvil.Anvil;
 import cn.nukkit.nbt.NBTIO;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 public class WorldConvert {
     public static final Set<RegionConvertWork> tasks = new HashSet<>();
-    private String path;
+    private final String path;
 
     public WorldConvert(String path) {
         this.path = path;
@@ -41,17 +42,17 @@ public class WorldConvert {
             preCreate = new File("output/the_end/region");
         }
         if (!preCreate.exists() && !preCreate.mkdirs()) {
-            System.out.println("Could not create the directory " + preCreate);
+            Logger.error("Could not create the directory " + preCreate);
             PNXWorldConverter.close(1);
         }
         if (!regions.exists()) {
-            System.out.println("region folder does not exist, please check if the path is correct !!!");
+            Logger.error("region folder does not exist, please check if the path is correct !!!");
             PNXWorldConverter.close(1);
         }
 
         var mcas = Objects.requireNonNull(regions.listFiles());
         if (mcas.length == 0) {
-            System.out.println("region folder is empty, please re-create world !!!");
+            Logger.error("region folder is empty, please re-create world !!!");
             PNXWorldConverter.close(1);
         }
         //convert level.dat to pnx
@@ -81,7 +82,7 @@ public class WorldConvert {
         try (var levelDat = new FileInputStream(path + "/level.dat")) {
             jeLevelData = NBTIO.readCompressed(levelDat, ByteOrder.BIG_ENDIAN).getCompound("Data");
         } catch (IOException e) {
-            System.out.println("level.dat file does not exist, please check if the path is correct !!!");
+            Logger.error("level.dat file does not exist, please check if the path is correct !!!");
             PNXWorldConverter.close(1);
         }
 
@@ -129,7 +130,7 @@ public class WorldConvert {
                 }
             });
         } catch (IOException e) {
-            System.out.println("Unable to write level.dat to output folder!!!");
+            Logger.error("Unable to write level.dat to output folder!!!");
             PNXWorldConverter.close(1);
         }
     }

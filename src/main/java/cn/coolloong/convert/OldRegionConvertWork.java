@@ -6,6 +6,7 @@ import cn.coolloong.format.Chunk112;
 import cn.coolloong.proxy.ProxyChunk;
 import cn.coolloong.proxy.ProxyRegionLoader;
 import cn.coolloong.utils.DataConvert;
+import cn.coolloong.utils.Logger;
 import cn.nukkit.level.DimensionEnum;
 import cn.nukkit.level.format.LevelProvider;
 import org.jglrxavpok.hephaistos.mca.AnvilException;
@@ -44,7 +45,9 @@ public class OldRegionConvertWork extends RegionConvertWork {
             region = new RegionFile(new RandomAccessFile(mca, "r"), regionX, regionZ);
             pnxRegion = new ProxyRegionLoader(levelProvider, regionX, regionZ);
         } catch (IOException | AnvilException e) {
-            throw new RuntimeException(e);
+            this.progress = -1;
+            Logger.warn("An error occurred while reading r." + regionX + "." + regionZ + ".mca!");
+            return;
         }
         try {
             end:
@@ -103,7 +106,7 @@ public class OldRegionConvertWork extends RegionConvertWork {
             }
             timeConsume = (System.currentTimeMillis() - time + "ms");
         } catch (InterruptedException e) {
-            System.out.println("Task ：" + mca.getName() + " interrupted!");
+            Logger.warn("Task ：" + mca.getName() + " interrupted!");
             try {
                 region.close();
                 pnxRegion.close();

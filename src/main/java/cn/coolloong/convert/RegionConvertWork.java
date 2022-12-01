@@ -5,6 +5,7 @@ import cn.coolloong.SupportVersion;
 import cn.coolloong.proxy.ProxyChunk;
 import cn.coolloong.proxy.ProxyRegionLoader;
 import cn.coolloong.utils.DataConvert;
+import cn.coolloong.utils.Logger;
 import cn.nukkit.level.DimensionEnum;
 import cn.nukkit.level.format.LevelProvider;
 import org.jglrxavpok.hephaistos.mca.AnvilException;
@@ -34,7 +35,7 @@ public class RegionConvertWork implements Runnable {
         this.levelProvider = levelProvider;
         this.dimension = dimension;
         this.version = version;
-        System.out.println("Starting convert  " + mca.getName());
+        Logger.info("Starting convert  " + mca.getName());
     }
 
     @Override
@@ -49,7 +50,9 @@ public class RegionConvertWork implements Runnable {
             region = new RegionFile(new RandomAccessFile(mca, "r"), regionX, regionZ);
             pnxRegion = new ProxyRegionLoader(levelProvider, regionX, regionZ);
         } catch (IOException | AnvilException e) {
-            throw new RuntimeException(e);
+            this.progress = -1;
+            Logger.warn("An error occurred while reading r." + regionX + "." + regionZ + ".mca!");
+            return;
         }
         try {
             end:
@@ -57,20 +60,11 @@ public class RegionConvertWork implements Runnable {
                 for (int rz = regionZ * 32; rz < regionZ * 32 + 32; ++rz) {
                     if (nowThread.isInterrupted()) throw new InterruptedException();
                     progress++;
-                    //x + region *32 z + region *32
-                    ChunkColumn chunkColumn;
+                    ChunkColumn chunkColumn = null;
                     try {
                         chunkColumn = region.getChunk(rx, rz);
-                    } catch (IllegalArgumentException e) {
-                        var chunkData = region.getChunkData(rx, rz).toMutableCompound();
-                        if (chunkData.getCompound("Level").getString("Status").equals("carved")) {
-                            var level = chunkData.getCompound("Level").toMutableCompound();
-                            level.setString("Status", "carvers");
-                            chunkData.set("Level", level.toCompound());
-                        }
-                        chunkColumn = new ChunkColumn(chunkData.toCompound());
+                    } catch (IllegalArgumentException ignored) {
                     }
-
                     if (chunkColumn == null) {
                         var pnxChunk = ProxyChunk.getEmptyChunk(rx, rz, levelProvider, dimension, 0, false, false);
                         if (pnxChunk == null) PNXWorldConverter.close(1);//error exit
@@ -134,7 +128,7 @@ public class RegionConvertWork implements Runnable {
             }
             timeConsume = (System.currentTimeMillis() - time + "ms");
         } catch (InterruptedException e) {
-            System.out.println("Task ：" + mca.getName() + " interrupted!");
+            Logger.warn("Task ：" + mca.getName() + " interrupted!");
             try {
                 region.close();
                 pnxRegion.close();
@@ -160,8 +154,12 @@ public class RegionConvertWork implements Runnable {
         return str.substring(0, Math.min(4, str.length())) + "%";
     }
 
-    public boolean isDone() {
-        return progress == 1024;
+    public int getStatus() {
+        return switch (progress) {
+            case 1024 -> 2;
+            case -1 -> 0;
+            default -> 1;
+        };
     }
 
     public void setInterrupted() {

@@ -39,21 +39,14 @@ public final class ConvertWorkFactory {
                     }
                 }
             } catch (AnvilException | IOException e) {
-                System.out.println("read chunk version information error !!!");
-                region.close();
+                Logger.error("read chunk version information error !!!");
                 PNXWorldConverter.close(1);
             }
         }
 
-        var result = switch (tmpVersion) {
+        return switch (tmpVersion) {
             case MC_OLD -> new OldRegionConvertWork(mca, levelProvider, dimension, tmpVersion);
             case MC_NEW -> new RegionConvertWork(mca, levelProvider, dimension, tmpVersion);
         };
-        if (result == null) {
-            System.out.println("error,unknown region format!!!");
-            region.close();
-            PNXWorldConverter.close(1);
-        }
-        return result;
     }
 }

@@ -142,7 +142,7 @@ public final class DataConvert {
                     beBlockState = (Map<String, Object>) fixBeState.get("bedrock_states");
                 }
             } else {
-                System.out.println("找不到" + sourceType.getName() + "对应的默认方块状态");
+                Logger.warn("找不到" + sourceType.getName() + "对应的默认方块状态");
             }
         }
 
@@ -169,7 +169,7 @@ public final class DataConvert {
         try {
             return BIOMES_MAP.get(sourceType);
         } catch (Exception e) {
-            System.out.println(sourceType);
+            Logger.warn(sourceType);
             return 0;
         }
     }

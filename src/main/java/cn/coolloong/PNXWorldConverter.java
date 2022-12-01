@@ -2,8 +2,11 @@ package cn.coolloong;
 
 import cn.coolloong.convert.RegionConvertWork;
 import cn.coolloong.convert.WorldConvert;
+import cn.coolloong.utils.Logger;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.DimensionEnum;
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 import picocli.CommandLine;
 
 import java.util.HashSet;
@@ -58,10 +61,10 @@ public class PNXWorldConverter implements Callable<Integer> {
             }
             RUN_SET.stream()
                     .map(run -> Long.parseLong(run.getTimeConsume().replace("ms", "")))
-                    .max(Long::compareTo).ifPresent(s -> System.out.println("All completed,Sum Time Consuming: " + s + "ms"));
-            System.out.println("complete!");
+                    .max(Long::compareTo).ifPresent(s -> Logger.info("All completed,Sum Time Consuming: " + s + "ms"));
+            Logger.info("complete!");
         } else if (status == 1) {
-            System.out.println("Convert interrupt!");
+            Logger.warn("Convert interrupt!");
         }
         TIMER.cancel();
         PNXWorldConverter.THREAD_POOL_EXECUTOR.shutdownNow();
@@ -73,6 +76,7 @@ public class PNXWorldConverter implements Callable<Integer> {
             exitThread = new ExitHandler();
             Runtime.getRuntime().addShutdownHook(exitThread);
             Block.init();
+            AnsiConsole.systemInstall();
             Class.forName("cn.nukkit.level.Level");
             Class.forName("cn.coolloong.utils.DataConvert");
             THREAD_POOL_EXECUTOR = (ForkJoinPool) Executors.newWorkStealingPool();
@@ -84,10 +88,13 @@ public class PNXWorldConverter implements Callable<Integer> {
                             RUN_SET.add(task);
                         }
                     }
-                    RUN_SET.stream().map(run -> {
-                        if (!run.isDone()) return run.getName() + ": " + run.getProgress();
-                        else return run.getName() + ": Done!" + "Time consuming: " + run.getTimeConsume();
-                    }).reduce((a, b) -> a + '\n' + b).ifPresent(s -> System.out.println("---\n" + s));
+                    var s = RUN_SET.stream().map(run -> {
+                        if (run.getStatus() == 1) return run.getName() + ": " + run.getProgress();
+                        else if (run.getStatus() == 2)
+                            return run.getName() + ": Done!" + "Time consuming: " + run.getTimeConsume();
+                        else return run.getName() + ": Convert Error!";
+                    }).reduce(Ansi.ansi().fgRgb(0, 255, 255).a("—".repeat(50)).reset().toString(), (a, b) -> a + "\n" + "  |  " + b);
+                    System.out.println(s);
                 }
             }, 500, 1000);
         } catch (Exception e) {
@@ -105,13 +112,12 @@ public class PNXWorldConverter implements Callable<Integer> {
 
     private static class ExitHandler extends Thread {
         public ExitHandler() {
-            super("CTRLC Handler");
+            super("CTRL-C-Handler");
         }
 
         public void run() {
-            System.out.println("Detect ctrl+c to interrupt a running task.");
             PNXWorldConverter.RUN_SET.forEach(task -> {
-                if (!task.isDone()) {
+                if (task.getStatus() != 2) {
                     task.setInterrupted();
                 }
             });
