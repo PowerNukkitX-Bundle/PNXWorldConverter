@@ -64,6 +64,14 @@ public class RegionConvertWork implements Runnable {
                     try {
                         chunkColumn = region.getChunk(rx, rz);
                     } catch (IllegalArgumentException ignored) {
+                    } catch (AnvilException e) {
+                        if (e.getMessage().contains("Missing field named 'xPos'") || e.getMessage().contains("Missing field named 'zPos'")) {
+                            var data = region.getChunkData(rx, rz).toMutableCompound();
+                            data.setInt("xPos", region.getChunkData(rx, rz).getCompound("Level").getInt("xPos"));
+                            data.setInt("zPos", region.getChunkData(rx, rz).getCompound("Level").getInt("zPos"));
+                            data.setString("Status", "spawn");
+                            chunkColumn = new ChunkColumn(data.toCompound());
+                        } else continue;
                     }
                     if (chunkColumn == null) {
                         var pnxChunk = ProxyChunk.getEmptyChunk(rx, rz, levelProvider, dimension, 0, false, false);
@@ -123,7 +131,10 @@ public class RegionConvertWork implements Runnable {
                     }
                     DataConvert.convertTileEntities(pnxChunk, chunkColumn::getBlockState, chunkColumn.getTileEntities(), version);
                     pnxRegion.saveChunk(rx & 31, rz & 31, pnxChunk.toBinary());
-                    region.forget(chunkColumn);
+                    try {
+                        region.forget(chunkColumn);
+                    } catch (IllegalArgumentException ignore) {
+                    }
                 }
             }
             timeConsume = (System.currentTimeMillis() - time + "ms");
@@ -156,9 +167,10 @@ public class RegionConvertWork implements Runnable {
 
     public int getStatus() {
         return switch (progress) {
-            case 1024 -> 2;
             case -1 -> 0;
-            default -> 1;
+            case 0 -> 1;
+            case 1024 -> 3;
+            default -> 2;
         };
     }
 

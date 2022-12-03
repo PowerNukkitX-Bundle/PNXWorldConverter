@@ -8,6 +8,7 @@ import cn.nukkit.blockstate.BlockState;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.utils.Config;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.jglrxavpok.hephaistos.nbt.*;
 
 import java.io.IOException;
@@ -321,8 +322,15 @@ public final class DataConvert {
                         var tag = i.getCompound("tag");
                         if (tag.contains("Damage")) tag.remove("Damage");//不知道干啥的nbt,pnx没有所以移除
                         if (tag.contains("display")) {
-                            var jsonName = GSON.fromJson(tag.getCompound("display").getString("Name"), Map.class);
-                            tag.getCompound("display").putString("Name", jsonName.get("text").toString());
+                            String text;
+                            try {
+                                var jsonName = GSON.fromJson(tag.getCompound("display").getString("Name"), Map.class);
+                                if (jsonName == null) text = tag.getCompound("display").getString("Name");
+                                else text = jsonName.get("text").toString();
+                            } catch (JsonSyntaxException e) {
+                                text = tag.getCompound("display").getString("Name");
+                            }
+                            tag.getCompound("display").putString("Name", text);
                         }
                         if (version == SupportVersion.MC_OLD) {
                             if (tag.containsList("ench")) {

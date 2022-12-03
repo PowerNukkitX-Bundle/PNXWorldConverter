@@ -16,7 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class WorldConvert {
-    public static final Set<RegionConvertWork> tasks = new HashSet<>();
+    public static final Set<RegionConvertWork> TASKS = new HashSet<>();
     private final String path;
 
     public WorldConvert(String path) {
@@ -66,7 +66,7 @@ public class WorldConvert {
                     //read region version information
                     var task = ConvertWorkFactory.make(mca, format, dimension);
                     PNXWorldConverter.THREAD_POOL_EXECUTOR.execute(task);
-                    tasks.add(task);
+                    TASKS.add(task);
                 }
             }
         } catch (IOException e) {

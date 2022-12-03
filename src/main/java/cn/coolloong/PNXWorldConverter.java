@@ -27,6 +27,8 @@ public class PNXWorldConverter implements Callable<Integer> {
     private DimensionEnum dimensionEnum;
 
     private static final Set<RegionConvertWork> RUN_SET = new HashSet<>();
+    private static final Set<RegionConvertWork> COMPLETE_SET = new HashSet<>();
+    private static final Set<RegionConvertWork> ERROR_SET = new HashSet<>();
     private static final Timer TIMER = new Timer();
     public static ForkJoinPool THREAD_POOL_EXECUTOR;
     public static Thread exitThread;
@@ -59,14 +61,17 @@ public class PNXWorldConverter implements Callable<Integer> {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+            Logger.info("End,Summary:\n");
+            Logger.info("Task Number: " + WorldConvert.TASKS.size());
+            Logger.info("Success Task Number: " + COMPLETE_SET.size());
+            Logger.info("Error Task Number: " + ERROR_SET.size());
             RUN_SET.stream()
                     .map(run -> Long.parseLong(run.getTimeConsume().replace("ms", "")))
-                    .max(Long::compareTo).ifPresent(s -> Logger.info("All completed,Sum Time Consuming: " + s + "ms"));
-            Logger.info("complete!");
+                    .max(Long::compareTo).ifPresent(s -> Logger.info("Sum Time Consuming: " + s + "ms"));
+            TIMER.cancel();
         } else if (status == 1) {
             Logger.warn("Convert interrupt!");
         }
-        TIMER.cancel();
         PNXWorldConverter.THREAD_POOL_EXECUTOR.shutdownNow();
         System.exit(status);
     }
@@ -83,17 +88,20 @@ public class PNXWorldConverter implements Callable<Integer> {
             TIMER.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    for (var task : WorldConvert.tasks) {
-                        if (task.getNowThread() != null) {
-                            RUN_SET.add(task);
+                    for (var task : WorldConvert.TASKS) {
+                        switch (task.getStatus()) {
+                            case 0 -> {
+                                ERROR_SET.add(task);
+                                RUN_SET.remove(task);
+                            }
+                            case 1, 2 -> RUN_SET.add(task);
+                            case 3 -> {
+                                RUN_SET.remove(task);
+                                COMPLETE_SET.add(task);
+                            }
                         }
                     }
-                    var s = RUN_SET.stream().map(run -> {
-                        if (run.getStatus() == 1) return run.getName() + ": " + run.getProgress();
-                        else if (run.getStatus() == 2)
-                            return run.getName() + ": Done!" + "Time consuming: " + run.getTimeConsume();
-                        else return run.getName() + ": Convert Error!";
-                    }).reduce(Ansi.ansi().fgRgb(0, 255, 255).a("—".repeat(50)).reset().toString(), (a, b) -> a + "\n" + "  |  " + b);
+                    var s = RUN_SET.stream().filter(t -> t.getStatus() > 1).map(run -> run.getName() + ": " + run.getProgress()).reduce(Ansi.ansi().fgRgb(0, 255, 255).a("—".repeat(50)).reset().toString(), (a, b) -> a + "\n" + "  |  " + b);
                     System.out.println(s);
                 }
             }, 500, 1000);
@@ -116,10 +124,9 @@ public class PNXWorldConverter implements Callable<Integer> {
         }
 
         public void run() {
-            PNXWorldConverter.RUN_SET.forEach(task -> {
-                if (task.getStatus() != 2) {
-                    task.setInterrupted();
-                }
+            TIMER.cancel();
+            PNXWorldConverter.RUN_SET.forEach(t -> {
+                if (t.getStatus() != 3) t.setInterrupted();
             });
             PNXWorldConverter.interrupted = true;
             try {
