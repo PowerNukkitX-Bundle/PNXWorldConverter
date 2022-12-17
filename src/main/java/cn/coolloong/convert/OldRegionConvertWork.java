@@ -114,6 +114,7 @@ public class OldRegionConvertWork extends RegionConvertWork {
                 throw new RuntimeException(ex);
             }
         } catch (AnvilException | IOException e) {
+            this.progress = -1;
             e.printStackTrace();
         }
     }

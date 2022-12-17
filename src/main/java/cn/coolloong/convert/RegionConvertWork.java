@@ -87,8 +87,8 @@ public class RegionConvertWork implements Runnable {
 //                        Files.writeString(Path.of("target/mca" + rx + ";" + rz + ".json"), region.getChunkData(rx, rz).toSNBT(), StandardCharsets.UTF_8);
 //                    }
 
-                    int miny = dimension.equals(DimensionEnum.NETHER) ? 0 : chunkColumn.getMinY();
-                    int maxy = dimension.equals(DimensionEnum.NETHER) ? 128 : chunkColumn.getMaxY();
+                    int miny = Math.max(-64, dimension.equals(DimensionEnum.NETHER) ? 0 : chunkColumn.getMinY());
+                    int maxy = Math.min(319, dimension.equals(DimensionEnum.NETHER) ? 128 : chunkColumn.getMaxY());
                     var pnxChunk = ProxyChunk.getEmptyChunk(rx, rz, levelProvider, dimension, chunkColumn.getInhabitedTime(), true, true);
                     if (pnxChunk == null) System.exit(0);//error exit
                     for (int x = 0; x < 16; ++x) {
@@ -156,6 +156,7 @@ public class RegionConvertWork implements Runnable {
                 throw new RuntimeException(ex);
             }
         } catch (AnvilException | IOException e) {
+            this.progress = -1;
             e.printStackTrace();
         }
     }
