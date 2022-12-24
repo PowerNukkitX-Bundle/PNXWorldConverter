@@ -157,7 +157,11 @@ public final class DataConvert {
                     nkState.append(";").append(k).append("=").append(number.intValue());
                 } else nkState.append(";").append(k).append("=").append(v);
             });
-            return BlockState.of(beBlockName + nkState);
+            try {
+                return BlockState.of(beBlockName + nkState);
+            } catch (NoSuchElementException e) {
+                return BlockState.AIR;
+            }
         } else {
             try {
                 return BlockState.of(beBlockName + "");

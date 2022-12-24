@@ -47,7 +47,7 @@ public class RegionConvertWork implements Runnable {
         ProxyRegionLoader pnxRegion;
         RegionFile region;
         try {
-            region = new RegionFile(new RandomAccessFile(mca, "r"), regionX, regionZ);
+            region = new RegionFile(new RandomAccessFile(mca, "rw"), regionX, regionZ);
             pnxRegion = new ProxyRegionLoader(levelProvider, regionX, regionZ);
         } catch (IOException | AnvilException e) {
             this.progress = -1;
