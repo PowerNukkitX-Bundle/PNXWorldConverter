@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.jglrxavpok.hephaistos.nbt.*;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
@@ -299,7 +300,8 @@ public final class DataConvert {
         compoundTag.remove("id");
     }
 
-    public static short convertEnchantment(String sourceType) {
+    @Nullable
+    public static Short convertEnchantment(String sourceType) {
         return ENCHANTMENT_MAP.get(sourceType);
     }
 
@@ -327,7 +329,8 @@ public final class DataConvert {
                                 var jsonName = GSON.fromJson(tag.getCompound("display").getString("Name"), Map.class);
                                 if (jsonName == null) text = tag.getCompound("display").getString("Name");
                                 else text = jsonName.get("text").toString();
-                            } catch (JsonSyntaxException e) {
+                                //jsonName.get("text")可空
+                            } catch (JsonSyntaxException | NullPointerException e) {
                                 text = tag.getCompound("display").getString("Name");
                             }
                             tag.getCompound("display").putString("Name", text);
@@ -341,7 +344,11 @@ public final class DataConvert {
                         } else if (version == SupportVersion.MC_NEW) {
                             if (tag.containsList("Enchantments")) {
                                 var list = tag.getList("Enchantments", CompoundTag.class);
-                                list.getAll().forEach(ench -> ench.putShort("id", convertEnchantment(ench.getString("id"))));
+                                list.getAll().forEach(ench -> {
+                                    var id = convertEnchantment(ench.getString("id"));
+                                    if (id != null)
+                                        ench.putShort("id", id);
+                                });
                                 tag.put("ench", list);
                                 tag.remove("Enchantments");
                             }

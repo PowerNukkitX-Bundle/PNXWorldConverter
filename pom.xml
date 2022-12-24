@@ -48,7 +48,7 @@
             <!-- mvn dependency:purge-local-repository -DmanualInclude="cn.powernukkitx:powernukkitx"-->
             <groupId>cn.powernukkitx</groupId>
             <artifactId>powernukkitx</artifactId>
-            <version>1.19.50-r2-mini</version>
+            <version>1.19.50-r2</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
