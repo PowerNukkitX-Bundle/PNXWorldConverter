@@ -129,7 +129,8 @@ public final class Chunk112 {
     }
 
     public long getInhabitedTime() {
-        return Objects.requireNonNull(this.levelTag.getLong("InhabitedTime"));
+        var time = this.levelTag.getLong("InhabitedTime");
+        return time == null ? 0L : time;
     }
 
     public String getBiome(int x, int z) {
