@@ -15,7 +15,7 @@ import java.util.Map;
 //jeItemsMapping.json https://github.com/GeyserMC/mappings
 //jeEnchantmentsMapping.json Manual make
 //jeBiomesMapping.json https://github.com/GeyserMC/mappings and https://github.com/PrismarineJS/minecraft-data modify
-//je1192DefaultBlockState.json https://github.com/PrismarineJS/minecraft-data
+//je1192DefaultBlockState.json https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/1.19/blocks.json modify
 public class Extract {
     public static void main(String[] args) throws IOException, URISyntaxException {
         var gson = new Gson();

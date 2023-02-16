@@ -64,7 +64,7 @@ public class RegionConvertWork implements Runnable {
                     try {
                         chunkColumn = region.getChunk(rx, rz);
                     } catch (IllegalArgumentException ignored) {
-                    } catch (AnvilException e) {
+                    } catch (AnvilException e) {//某些特殊版本错误，补全字段继续转换
                         if (e.getMessage().contains("Missing field named 'xPos'") || e.getMessage().contains("Missing field named 'zPos'")) {
                             var data = region.getChunkData(rx, rz).toMutableCompound();
                             data.setInt("xPos", region.getChunkData(rx, rz).getCompound("Level").getInt("xPos"));

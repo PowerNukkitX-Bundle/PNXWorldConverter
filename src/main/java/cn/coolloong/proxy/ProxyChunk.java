@@ -66,7 +66,6 @@ public class ProxyChunk extends Chunk {
             chunk.inhabitedTime = inhabitedTime;
             chunk.terrainGenerated = terrainGenerated;
             chunk.terrainPopulated = terrainPopulated;
-            chunk.isNew384World = dimensionEnum.equals(DimensionEnum.OVERWORLD);
             return chunk;
         } catch (Exception e) {
             e.printStackTrace();

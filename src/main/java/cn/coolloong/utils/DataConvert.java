@@ -7,6 +7,8 @@ import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockstate.BlockState;
 import cn.nukkit.nbt.tag.*;
 import cn.nukkit.utils.Config;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import org.jglrxavpok.hephaistos.nbt.*;
@@ -14,6 +16,7 @@ import org.jglrxavpok.hephaistos.nbt.*;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public final class DataConvert {
@@ -25,6 +28,8 @@ public final class DataConvert {
     private static final Map<org.jglrxavpok.hephaistos.mca.BlockState, Map<String, Object>> JE_BLOCKS_MAPPING = new HashMap<>();
     public static final Map<Integer, Integer> JE112_ENCHID_2_PNXID = new HashMap<>();
     private static final Gson GSON = new Gson();
+
+    private static final Cache<org.jglrxavpok.hephaistos.mca.BlockState, BlockState> BLOCK_STATE_CACHE = Caffeine.newBuilder().expireAfterWrite(Long.MAX_VALUE, TimeUnit.MINUTES).build();
 
     static {
         final var config = new Config(Config.JSON);
@@ -80,7 +85,7 @@ public final class DataConvert {
         config.getAll().forEach((k, v) -> {
             var strings = k.replace("[", ",").replace("]", ",").replace(" ", "").split(",");
             var map = new HashMap<String, String>();
-            if (strings.length > 1) {
+            if (strings.length > 0) {
                 for (int i = 1; i < strings.length; i++) {
                     final var tmp = strings[i];
                     final var index = tmp.indexOf("=");
@@ -118,6 +123,9 @@ public final class DataConvert {
     }
 
     public static BlockState convertBlockState(org.jglrxavpok.hephaistos.mca.BlockState sourceType) {
+        //添加缓存
+        var cache = BLOCK_STATE_CACHE.getIfPresent(sourceType);
+        if (cache != null) return cache;
         var beState = JE_BLOCKS_MAPPING.get(sourceType);
         String beBlockName = null;
         Map<String, Object> beBlockState = null;
@@ -126,7 +134,7 @@ public final class DataConvert {
             beBlockName = beState.get("bedrock_identifier").toString();
             //noinspection unchecked
             beBlockState = (Map<String, Object>) beState.get("bedrock_states");
-        } else {//由于不同版本数据值可能存在一定区别，当前映射文件是最新的，所以找不到就模糊匹配
+        } else {//基准版本1.19 由于不同版本数据值可能存在一定区别，当前映射文件是最新的，所以找不到就模糊匹配
             var defaultState = DEFAULT_BLOCKS_MAP.get(sourceType.getName());
             if (defaultState != null) {
                 var map = new LinkedHashMap<>(sourceType.getProperties());
@@ -144,7 +152,7 @@ public final class DataConvert {
                     beBlockState = (Map<String, Object>) fixBeState.get("bedrock_states");
                 }
             } else {
-                Logger.warn("找不到" + sourceType.getName() + "对应的默认方块状态");
+                Logger.warn("cant find the default BlockState in " + sourceType.getName() + " block");
             }
         }
 
@@ -157,11 +165,16 @@ public final class DataConvert {
                     nkState.append(";").append(k).append("=").append(number.intValue());
                 } else nkState.append(";").append(k).append("=").append(v);
             });
-            return BlockState.of(beBlockName + nkState);
+            var result = BlockState.of(beBlockName + nkState);
+            BLOCK_STATE_CACHE.put(sourceType, result);
+            return result;
         } else {
             try {
-                return BlockState.of(beBlockName + "");
+                var result = BlockState.of(beBlockName + "");
+                BLOCK_STATE_CACHE.put(sourceType, result);
+                return result;
             } catch (NoSuchElementException e) {
+                BLOCK_STATE_CACHE.put(sourceType, BlockState.AIR);
                 return BlockState.AIR;
             }
         }
