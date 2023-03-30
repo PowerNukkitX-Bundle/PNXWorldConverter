@@ -2,7 +2,7 @@ package cn.coolloong;
 
 public enum SupportVersion {
     MC_OLD(169, 1343),//1.9-1.12
-    MC_NEW(2200, 3218);//1.15-1.19.3
+    MC_NEW(2200, 3337);//1.15-1.19.3
     final int start;
     final int end;
 
@@ -11,12 +11,18 @@ public enum SupportVersion {
         this.end = end;
     }
 
-    public static SupportVersion selectVersion(int dataVersion) {
+    /**
+     * Select version support version.
+     *
+     * @param dataVersion the data version
+     * @return the support version
+     */
+    public static SupportVersion selectVersion(int dataVersion) throws UnsupportedOperationException {
         for (var ver : SupportVersion.values()) {
             if (dataVersion <= ver.end && dataVersion >= ver.start) {
                 return ver;
             }
         }
-        return MC_OLD;
+        throw new UnsupportedOperationException("UnSupport World Version: " + dataVersion);
     }
 }

@@ -933,66 +933,82 @@
   },
   "minecraft:white_wool": {
     "bedrock_identifier": "minecraft:white_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 1996
   },
   "minecraft:orange_wool": {
     "bedrock_identifier": "minecraft:orange_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 1997
   },
   "minecraft:magenta_wool": {
     "bedrock_identifier": "minecraft:magenta_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 1998
   },
   "minecraft:light_blue_wool": {
     "bedrock_identifier": "minecraft:light_blue_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 1999
   },
   "minecraft:yellow_wool": {
     "bedrock_identifier": "minecraft:yellow_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2000
   },
   "minecraft:lime_wool": {
     "bedrock_identifier": "minecraft:lime_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2001
   },
   "minecraft:pink_wool": {
     "bedrock_identifier": "minecraft:pink_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2002
   },
   "minecraft:gray_wool": {
     "bedrock_identifier": "minecraft:gray_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2003
   },
   "minecraft:light_gray_wool": {
     "bedrock_identifier": "minecraft:light_gray_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2004
   },
   "minecraft:cyan_wool": {
     "bedrock_identifier": "minecraft:cyan_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2005
   },
   "minecraft:purple_wool": {
     "bedrock_identifier": "minecraft:purple_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2006
   },
   "minecraft:blue_wool": {
     "bedrock_identifier": "minecraft:blue_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2007
   },
   "minecraft:brown_wool": {
     "bedrock_identifier": "minecraft:brown_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2008
   },
   "minecraft:green_wool": {
     "bedrock_identifier": "minecraft:green_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2009
   },
   "minecraft:red_wool": {
     "bedrock_identifier": "minecraft:red_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2010
   },
   "minecraft:black_wool": {
     "bedrock_identifier": "minecraft:black_wool",
+    "bedrock_data": 0,
     "firstBlockRuntimeId": 2011
   },
   "minecraft:dandelion": {

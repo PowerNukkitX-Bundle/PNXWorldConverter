@@ -106,7 +106,7 @@ public final class DataConvert {
 //            } catch (IOException e) {
 //                throw new RuntimeException(e);
 //            }
-            System.out.println("找不到legacyID对应的方块:" + LegacyId);
+            Logger.warn("cant find legacyID:" + LegacyId);
             return new org.jglrxavpok.hephaistos.mca.BlockState("minecraft:air", Map.of());
         }
         var name = list.get(0).toString();
@@ -174,6 +174,7 @@ public final class DataConvert {
                 BLOCK_STATE_CACHE.put(sourceType, result);
                 return result;
             } catch (NoSuchElementException e) {
+                Logger.warn("cant find: " + beBlockName);
                 BLOCK_STATE_CACHE.put(sourceType, BlockState.AIR);
                 return BlockState.AIR;
             }

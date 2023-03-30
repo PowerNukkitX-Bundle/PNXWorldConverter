@@ -50,7 +50,6 @@ public class OldRegionConvertWork extends RegionConvertWork {
             return;
         }
         try {
-            end:
             for (int rx = regionX * 32; rx < regionX * 32 + 32; ++rx) {
                 for (int rz = regionZ * 32; rz < regionZ * 32 + 32; ++rz) {
                     if (nowThread.isInterrupted()) throw new InterruptedException();
@@ -113,7 +112,7 @@ public class OldRegionConvertWork extends RegionConvertWork {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-        } catch (AnvilException | IOException e) {
+        } catch (Exception e) {
             this.progress = -1;
             e.printStackTrace();
         }

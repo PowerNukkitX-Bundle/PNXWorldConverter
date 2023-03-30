@@ -30,10 +30,15 @@ public final class ConvertWorkFactory {
                     for (int rz = regionZ * 32; rz < regionZ * 32 + 32; ++rz) {
                         var chunkData = region.getChunkData(rx, rz);
                         if (chunkData != null) {
-                            //noinspection ConstantConditions
-                            if (chunkData.contains("DataVersion")) {
-                                tmpVersion = SupportVersion.selectVersion(chunkData.getInt("DataVersion"));
-                            } else tmpVersion = SupportVersion.MC_OLD;
+                            try {
+                                if (chunkData.contains("DataVersion")) {
+                                    //noinspection ConstantConditions
+                                    tmpVersion = SupportVersion.selectVersion(chunkData.getInt("DataVersion"));
+                                } else tmpVersion = SupportVersion.MC_OLD;
+                            } catch (UnsupportedOperationException e) {
+                                e.printStackTrace();
+                                PNXWorldConverter.close(1);
+                            }
                             break end;
                         }
                     }

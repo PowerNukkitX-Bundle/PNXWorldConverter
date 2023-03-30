@@ -28,12 +28,12 @@ D:\your device path\1.19.2\.MINECRAFT\SAVES\new world  ←this is save_path
 
 ### Support Version
 
-|  Version  | Available |
-|:---------:| :----: |
-| Below 1.7 | ❓ |
-| 1.7-1.12  | ✅ |
-| 1.13-1.14 | ❌ |
-| 1.15-1.19 | ✅ |
+|   Version   | Available |
+|:-----------:| :----: |
+|  Below 1.7  | ❓ |
+|  1.7-1.12   | ✅ |
+|  1.13-1.14  | ❌ |
+| 1.15-1.19.4 | ✅ |
 
 ### Tips
 
