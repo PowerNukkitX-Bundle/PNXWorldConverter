@@ -6,7 +6,7 @@
 
     <groupId>cn.coolloong</groupId>
     <artifactId>pnxworldconvert</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -44,11 +44,11 @@
     <dependencies>
         <dependency>
             <!-- maven local repository -->
-            <!-- mvn install:install-file -Dfile=${project.basedir}/libs/powernukkitx-1.19.70-r1-mini.jar -DgroupId=cn.powernukkitx -DartifactId=powernukkitx -Dversion=1.19.70-r1-mini -Dpackaging=jar  -->
+            <!-- mvn install:install-file -Dfile=${project.basedir}/libs/powernukkitx-1.19.60-r1-mini.jar -DgroupId=cn.powernukkitx -DartifactId=powernukkitx -Dversion=1.19.60-r1-mini -Dpackaging=jar  -->
             <!-- mvn dependency:purge-local-repository -DmanualInclude="cn.powernukkitx:powernukkitx"-->
             <groupId>cn.powernukkitx</groupId>
             <artifactId>powernukkitx</artifactId>
-            <version>1.19.70-r1-mini</version>
+            <version>1.19.60-r1-mini</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
