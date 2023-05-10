@@ -17,10 +17,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
-@CommandLine.Command(description = "Usage examples: \n" +
+@CommandLine.Command(name = "", description = "Usage examples: \n" +
         "java -jar pnxworldconvert.jar -t D:mc\\.minecraft\\save\\new world -d OVERWORLD")
 public class PNXWorldConverter implements Callable<Integer> {
-    @CommandLine.Option(names = {"-t", "--target"}, paramLabel = "PATH", description = "convert target path")
+    @CommandLine.Option(names = {"-t", "--target"}, paramLabel = "PATH", description = "The path of convert target world")
     private String target;
 
     @CommandLine.Option(names = {"-d", "--dimension"}, paramLabel = "Dimension", description = "Valid values: ${COMPLETION-CANDIDATES}")
@@ -36,6 +36,10 @@ public class PNXWorldConverter implements Callable<Integer> {
 
     public static void main(String[] args) {
         var mainClass = new PNXWorldConverter();
+        if (args.length == 0) {
+            Logger.info(new CommandLine(mainClass).getUsageMessage());
+            System.exit(0);
+        }
         var status = new CommandLine(mainClass).execute(args);
         if (status == 0) {
             init();
