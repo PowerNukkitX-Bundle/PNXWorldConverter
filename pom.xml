@@ -17,6 +17,11 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>4.0.0-M8</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
@@ -44,11 +49,11 @@
     <dependencies>
         <dependency>
             <!-- maven local repository -->
-            <!-- mvn install:install-file -Dfile=${project.basedir}/libs/powernukkitx-1.19.80-r2-mini.jar -DgroupId=cn.powernukkitx -DartifactId=powernukkitx -Dversion=1.19.80-r2-mini -Dpackaging=jar  -->
+            <!-- mvn install:install-file -Dfile="${project.basedir}/libs/powernukkitx-1.20.10-r1-mini.jar" -DgroupId="cn.powernukkitx" -DartifactId="powernukkitx" -Dversion="1.20.10-r1-mini" -Dpackaging="jar"  -->
             <!-- mvn dependency:purge-local-repository -DmanualInclude="cn.powernukkitx:powernukkitx"-->
             <groupId>cn.powernukkitx</groupId>
             <artifactId>powernukkitx</artifactId>
-            <version>1.19.80-r2-mini</version>
+            <version>1.20.10-r1-mini</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -66,7 +71,7 @@
         <dependency>
             <groupId>io.github.jglrxavpok.hephaistos</groupId>
             <artifactId>common</artifactId>
-            <version>2.5.3</version>
+            <version>2.6.0</version>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>

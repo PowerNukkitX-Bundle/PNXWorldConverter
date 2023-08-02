@@ -62,7 +62,7 @@ public class ProxyChunk extends Chunk {
         try {
             ProxyChunk chunk = new ProxyChunk(Anvil.class, null, dimensionEnum.getDimensionData());
             chunk.setPosition(chunkX, chunkZ);
-            chunk.heightMap = new byte[256];
+            chunk.heightMap = new short[256];
             chunk.inhabitedTime = inhabitedTime;
             chunk.terrainGenerated = terrainGenerated;
             chunk.terrainPopulated = terrainPopulated;
@@ -89,9 +89,9 @@ public class ProxyChunk extends Chunk {
 
         nbt.putByteArray("Biomes", this.getBiomeIdArray());
         int[] heightInts = new int[256];
-        byte[] heightBytes = this.getHeightMapArray();
+        short[] heightBytes = this.getNewHeightMapArray();
         for (int i = 0; i < heightInts.length; i++) {
-            heightInts[i] = heightBytes[i] & 0xFF;
+            heightInts[i] = heightBytes[i] & 0xFFFF;
         }
         nbt.putIntArray("HeightMap", heightInts);
 

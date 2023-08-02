@@ -11,10 +11,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 //DataSource
-//legacy_blocks.json https://github.com/matcool/anvil-parser/blob/master/anvil/legacy_blocks.json modify
-//jeItemsMapping.json https://github.com/GeyserMC/mappings
+//biomes.json blocks.json items.json https://github.com/GeyserMC/mappings
 //jeEnchantmentsMapping.json Manual make
-//jeBiomesMapping.json https://github.com/GeyserMC/mappings and https://github.com/PrismarineJS/minecraft-data modify
+//legacy_blocks.json https://github.com/matcool/anvil-parser/blob/master/anvil/legacy_blocks.json modify
 //je1192DefaultBlockState.json https://github.com/PrismarineJS/minecraft-data/blob/master/data/pc/1.19/blocks.json modify
 public class Extract {
     public static void main(String[] args) throws IOException, URISyntaxException {

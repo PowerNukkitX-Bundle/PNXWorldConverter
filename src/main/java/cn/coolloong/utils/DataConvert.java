@@ -34,14 +34,14 @@ public final class DataConvert {
     static {
         final var config = new Config(Config.JSON);
         try {
-            config.load(PNXWorldConverter.class.getModule().getResourceAsStream("jeBiomesMapping.json"));
+            config.load(PNXWorldConverter.class.getModule().getResourceAsStream("biomes.json"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        config.getAll().forEach((k, v) -> BIOMES_MAP.put(k, ((Number) v).intValue()));
+        config.getAll().forEach((k, v) -> BIOMES_MAP.put(k, ((Number) ((Map<String, ?>) v).get("bedrock_id")).intValue()));
 
         try {
-            config.load(PNXWorldConverter.class.getModule().getResourceAsStream("jeItemsMapping.json"));
+            config.load(PNXWorldConverter.class.getModule().getResourceAsStream("items.json"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -78,7 +78,7 @@ public final class DataConvert {
         config.getAll().forEach((k, v) -> JE112_ENCHID_2_PNXID.put(Math.round(Float.parseFloat(k)), ((Number) v).intValue()));
 
         try {
-            config.load(PNXWorldConverter.class.getModule().getResourceAsStream("jeBlocksMapping.json"));
+            config.load(PNXWorldConverter.class.getModule().getResourceAsStream("blocks.json"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

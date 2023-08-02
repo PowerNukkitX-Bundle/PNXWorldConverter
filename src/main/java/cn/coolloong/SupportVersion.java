@@ -2,7 +2,7 @@ package cn.coolloong;
 
 public enum SupportVersion {
     MC_OLD(169, 1343),//1.9-1.12
-    MC_NEW(2200, 3337);//1.15-1.19.3
+    MC_NEW(2200, 3465);//1.15-1.20.1
     final int start;
     final int end;
 
