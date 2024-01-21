@@ -1,6 +1,16 @@
 ### Usage
 
-`java -jar pnxworldconvert.jar -t save_path -d dimension_name`
+```cmd
+java -jar pnxworldconvert.jar -t save_path -d dimension_name
+```
+
+> [!CAUTION]
+> Warning: often when you download **pnxworldconvert** the version is written behind, so don't forget to either rename the file to `pnxworldconvert` or modify the command line by just adding the version of **pnxworldconvert** you downloaded.
+> Exemple:
+> ```cmd
+> java -jar pnxworldconvert-1.0.9.jar -t save_path -d dimension_name
+> ```
+
 
 ### Params
 
